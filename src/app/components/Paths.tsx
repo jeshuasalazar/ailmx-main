@@ -1,7 +1,6 @@
 "use client";
 import { useRef, useEffect } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
-import Image from "next/image";
 
 function FlowCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);

@@ -4,48 +4,42 @@ import { useState, useEffect } from 'react';
 export default function Activar() {
   const [nombre, setNombre] = useState('');
   const [email, setEmail]   = useState('');
-  const [prefilled, setPrefilled] = useState(false);
+  const [prefilled] = useState(false);
   const [consent, setConsent]     = useState(false);
   const [sending, setSending]     = useState(false);
+  const [error, setError]         = useState('');
   const [state, setState]         = useState<'form'|'success'>('form');
   const [counter, setCounter]     = useState(0);
 
   useEffect(() => {
-    const p = new URLSearchParams(window.location.search);
-    const pN = decodeURIComponent(p.get('nombre') || '').trim();
-    const pE = decodeURIComponent(p.get('email')  || '').trim();
-    if (pN.length > 1)    { setNombre(pN); setPrefilled(true); }
-    if (pE.includes('@')) { setEmail(pE);  setConsent(true); }
-    if (pN.length > 1 && pE.includes('@')) { autoActivate(pN, pE); }
     let n = 0; const target = 209;
     const t = setInterval(() => { n = Math.min(n + 6, target); setCounter(n); if (n >= target) clearInterval(t); }, 40);
     return () => clearInterval(t);
   }, []);
 
-  async function autoActivate(name: string, emailAddr: string) {
-    await registerLead(name, emailAddr);
-    setState('success');
-  }
-
   async function handleSubmit() {
-    if (!nombre || nombre.trim().split(/\s+/).length < 2) { alert('Escribe tu nombre y apellido.'); return; }
-    if (!email || !email.includes('@')) { alert('Ingresa un correo válido.'); return; }
-    if (!consent) { alert('Necesitamos tu autorización para activar tu acceso.'); return; }
+    setError('');
+    if (!nombre || nombre.trim().split(/\s+/).length < 2) { setError('Escribe tu nombre y apellido.'); return; }
+    if (!email || !email.includes('@')) { setError('Ingresa un correo válido.'); return; }
+    if (!consent) { setError('Necesitamos tu autorización para activar tu acceso.'); return; }
     setSending(true);
-    await registerLead(nombre, email);
-    setState('success');
+    const ok = await registerLead(nombre, email);
     setSending(false);
+    if (ok) setState('success');
+    else setError('No pudimos activar tu acceso ahora. Intenta de nuevo en un momento.');
   }
 
-  async function registerLead(name: string, emailAddr: string) {
+  async function registerLead(name: string, emailAddr: string): Promise<boolean> {
     try {
-      const [firstName, ...rest] = name.split(' ');
-      await fetch('https://api.brevo.com/v3/contacts', {
+      const res = await fetch('/api/leads', {
         method: 'POST',
-        headers: { 'accept': 'application/json', 'content-type': 'application/json', 'api-key': process.env.NEXT_PUBLIC_BREVO_API_KEY || '' },
-        body: JSON.stringify({ email: emailAddr, attributes: { NOMBRE: firstName, APELLIDO: rest.join(' '), FUENTE: 'Activar 60 dias AMCP 2026', ACCESO_60_DIAS: 'pendiente' }, listIds: [parseInt(process.env.NEXT_PUBLIC_BREVO_LIST_ID || '0')], updateEnabled: true })
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ source: 'Activar 60 dias AMCP 2026', tipo: 'f', nombre: name, email: emailAddr, consent: true }),
       });
-    } catch {}
+      return res.ok;
+    } catch {
+      return false;
+    }
   }
 
   const firstName = nombre.split(' ')[0] || 'campeón';
@@ -162,6 +156,7 @@ export default function Activar() {
                     <input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>
                     <span className="av-ctxt">Acepto que aiLearning me contacte para activar mi acceso. Datos protegidos conforme a la <a href="/privacidad">LFPDPPP</a>. Puedo cancelar en cualquier momento.</span>
                   </label>
+                  {error && <p style={{color:'#E74C3C',fontSize:'12px',textAlign:'center',margin:'0 0 10px'}} role="alert">{error}</p>}
                   <button className="av-btn" onClick={handleSubmit} disabled={sending}>
                     {sending?'Activando...':'🚀 Activar mis 60 días gratis'}
                   </button>

@@ -1,31 +1,35 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export default function Jornadas2026() {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
-  const [prefilled, setPrefilled] = useState(false);
+  const [prefilled] = useState(false);
   const [consent, setConsent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
   const [state, setState] = useState<'form'|'direct'|'success'>('form');
   const PDF_URL = '/jornadas2026/guia.pdf';
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const pN = decodeURIComponent(params.get('nombre') || '').trim();
-    const pE = decodeURIComponent(params.get('email')  || '').trim();
-    if (pN.length > 1) { setNombre(pN); setPrefilled(true); }
-    if (pE.includes('@')) { setEmail(pE); setConsent(true); }
-    if (pN.length > 1 && pE.includes('@')) { setState('direct'); }
-  }, []);
-
   async function handleSubmit() {
-    if (!nombre || nombre.trim().split(/\s+/).length < 2) { alert('Escribe tu nombre y apellido.'); return; }
-    if (!email || !email.includes('@')) { alert('Ingresa un correo válido.'); return; }
-    if (!consent) { alert('Necesitamos tu autorización.'); return; }
+    setError('');
+    if (!nombre || nombre.trim().split(/\s+/).length < 2) { setError('Escribe tu nombre y apellido.'); return; }
+    if (!email || !email.includes('@')) { setError('Ingresa un correo válido.'); return; }
+    if (!consent) { setError('Necesitamos tu autorización.'); return; }
     setSending(true);
-    setState('success');
-    setSending(false);
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ source: 'Guia Jornadas AMCP 2026', tipo: 'f', nombre, email, consent: true }),
+      });
+      setSending(false);
+      if (res.ok) setState('success');
+      else setError('No pudimos enviar la guía ahora. Usa la descarga directa abajo.');
+    } catch {
+      setSending(false);
+      setError('Error de conexión. Usa la descarga directa abajo.');
+    }
   }
 
   return (
@@ -130,6 +134,7 @@ export default function Jornadas2026() {
                   <input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>
                   <span className="jctxt">Acepto recibir la guía y contenido de <strong>aiLearning</strong>. Puedo cancelar respondiendo STOP. Datos protegidos conforme a la <a href="/privacidad">LFPDPPP</a>.</span>
                 </label>
+                {error && <p style={{color:'#E74C3C',fontSize:'12px',textAlign:'center',margin:'0 0 10px'}} role="alert">{error}</p>}
                 <button className="jbtn" onClick={handleSubmit} disabled={sending}>
                   {sending?'Enviando...':<><span>Quiero mi guía gratis</span><span>→</span></>}
                 </button>

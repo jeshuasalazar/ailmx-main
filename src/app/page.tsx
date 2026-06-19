@@ -1,16 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { RegisterModal } from "./components/RegisterModal";
 import { AvatarVSL } from "./components/AvatarVSL";
-import { Ladder } from "./components/Ladder";
 
 /* ─────────────────────────────────────────────────────────────
    THEME SYSTEM — dark/light + i18n
    ───────────────────────────────────────────────────────────── */
 type Theme = "dark" | "light";
 type Lang  = "es" | "en";
+
+interface Plan {
+  name: string; blurb: string; price: string; per: string;
+  items: string[]; dim: string[]; cta: string; ctaStyle: string;
+  priceAnn?: string; featured?: boolean; ribbon?: string;
+}
 
 const T = {
   es: {
@@ -252,27 +258,6 @@ const T = {
 };
 
 /* ─────────────────────────────────────────────────────────────
-   COUNTER
-   ───────────────────────────────────────────────────────────── */
-function Counter({ target, suffix }: { target: number; suffix: string }) {
-  const [val, setVal] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
-  useEffect(() => {
-    if (!inView) return;
-    const dur = 1400, start = performance.now();
-    const update = (now: number) => {
-      const p = Math.min((now - start) / dur, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
-      setVal(Math.round(ease * target));
-      if (p < 1) requestAnimationFrame(update);
-    };
-    requestAnimationFrame(update);
-  }, [inView, target]);
-  return <span ref={ref}>{val.toLocaleString("es-MX")}{suffix}</span>;
-}
-
-/* ─────────────────────────────────────────────────────────────
    REVEAL WRAPPER
    ───────────────────────────────────────────────────────────── */
 function Reveal({ children, delay = 0, className = "" }: {
@@ -341,7 +326,7 @@ export default function Home() {
   const [billing, setBilling] = useState<"monthly"|"annual">("monthly");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [modal, setModal] = useState<{open:boolean;tipo:"f"|"b";email:string}>({open:false,tipo:"f",email:""});
-  const [sent, setSent]   = useState<{f:boolean;b:boolean}>({f:false,b:false});
+  const [, setSent]   = useState<{f:boolean;b:boolean}>({f:false,b:false});
 
   const t = T[lang];
 
@@ -438,8 +423,7 @@ export default function Home() {
         <div className="wrap" style={{ display:"flex", alignItems:"center", justifyContent:"space-between", height:68 }}>
           {/* Logo */}
           <a href="#" style={{ display:"flex", alignItems:"center", gap:10, textDecoration:"none" }}>
-            <img src="/logo-ailearning.png" alt="aiLearning" style={{ height:36, width:"auto", objectFit:"contain" }}/>
-
+            <Image src="/logo-ailearning.png" alt="aiLearning" width={152} height={36} priority style={{ height:36, width:"auto", objectFit:"contain" }}/>
           </a>
           {/* Links desktop */}
           <nav style={{ display:"flex", gap:32, alignItems:"center" }} className="hide-mobile">
@@ -721,17 +705,17 @@ export default function Home() {
 
           {/* Plan cards */}
           <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:20 }} className="plans-grid">
-            {t.plans.map((plan, i) => (
+            {(t.plans as Plan[]).map((plan, i) => (
               <Reveal key={i} delay={i*0.06}>
                 <article style={{
-                  background:surface, border:`1px solid ${(plan as any).featured ? blue : line}`,
+                  background:surface, border:`1px solid ${plan.featured ? blue : line}`,
                   borderRadius:14, padding:"clamp(28px,3vw,40px)", display:"grid", gap:20, alignContent:"start", position:"relative",
-                  boxShadow: (plan as any).featured ? `0 20px 60px -30px ${blue}4d` : "none",
+                  boxShadow: plan.featured ? `0 20px 60px -30px ${blue}4d` : "none",
                   transition:"border-color 0.3s",
                 }}>
-                  {(plan as any).ribbon && (
+                  {plan.ribbon && (
                     <div style={{ position:"absolute", top:-11, left:24, background:blue, color:"#fff", fontFamily:"'JetBrains Mono',monospace", fontSize:10, letterSpacing:"0.16em", textTransform:"uppercase", padding:"4px 10px", borderRadius:4 }}>
-                      {(plan as any).ribbon}
+                      {plan.ribbon}
                     </div>
                   )}
                   <div>
@@ -741,11 +725,11 @@ export default function Home() {
                   <div style={{ display:"flex", alignItems:"baseline", gap:6 }}>
                     <span style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:11, color:faint, letterSpacing:"0.12em", alignSelf:"flex-start", marginTop:4 }}>MXN</span>
                     <span style={{ fontFamily:"'Fraunces',Georgia,serif", fontSize:"clamp(40px,4.5vw,52px)", fontWeight:300, letterSpacing:"-0.025em", lineHeight:1, color:ink }}>
-                      {billing==="annual" && (plan as any).priceAnn ? (plan as any).priceAnn : plan.price}
+                      {billing==="annual" && plan.priceAnn ? plan.priceAnn : plan.price}
                     </span>
                     <span style={{ fontFamily:"'Inter',sans-serif", fontSize:13, color:muted, fontWeight:400 }}>{plan.per}</span>
                   </div>
-                  {billing==="annual" && (plan as any).priceAnn && (
+                  {billing==="annual" && plan.priceAnn && (
                     <p style={{ fontFamily:"'JetBrains Mono',monospace", fontSize:10, color:faint, letterSpacing:"0.1em", marginTop:-12 }}>Facturado anual · 10 meses al año</p>
                   )}
                   <ul style={{ display:"grid", gap:10, listStyle:"none" }}>
@@ -1004,8 +988,7 @@ export default function Home() {
             {/* Brand */}
             <div>
               <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:16 }}>
-                <img src="/logo-ailearning.png" alt="aiLearning" style={{ height:30, width:"auto", objectFit:"contain" }}/>
-  
+                <Image src="/logo-ailearning.png" alt="aiLearning" width={127} height={30} style={{ height:30, width:"auto", objectFit:"contain" }}/>
               </div>
               <p style={{ fontSize:14, color:muted, maxWidth:"38ch", lineHeight:1.6 }}>{t.footDesc}</p>
               <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginTop:16 }}>

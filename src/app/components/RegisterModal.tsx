@@ -2,8 +2,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const BREVO_KEY = process.env.NEXT_PUBLIC_BREVO_API_KEY || "";
-
 const PAISES = [
   "México","Colombia","Argentina","España","Chile","Perú","Ecuador",
   "Guatemala","Venezuela","Bolivia","Honduras","Paraguay","Uruguay",
@@ -13,54 +11,6 @@ const PAISES = [
 const FUENTES = [
   "Redes sociales","Recomendación","Google","YouTube","Otro",
 ];
-
-// Email de bienvenida según tipo
-const EMAIL_TEMPLATES = {
-  f: {
-    subject: "¡Bienvenido a aiLearning! Tu acceso al minicurso está listo 🚀",
-    html: (nombre: string) => `
-      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;background:#05080e;color:#fff;border-radius:12px;overflow:hidden">
-        <div style="background:linear-gradient(135deg,#0d1826,#1a3050);padding:32px 32px 24px;text-align:center">
-          <div style="font-size:28px;font-weight:900;letter-spacing:-1px">ai<span style="color:#2B7FE0">Learning</span> IyDE</div>
-        </div>
-        <div style="padding:32px">
-          <h1 style="font-size:22px;font-weight:800;margin:0 0 8px">¡Hola, ${nombre}! 👋</h1>
-          <p style="color:rgba(255,255,255,0.6);line-height:1.6;margin:0 0 24px">
-            Tu registro fue exitoso. En menos de 1 hora puedes tener tu primer agente de IA funcionando.
-          </p>
-          <a href="https://ailearning.mx/aprende/gratis"
-            style="display:block;text-align:center;background:#2B7FE0;color:#fff;text-decoration:none;padding:14px 24px;border-radius:10px;font-weight:700;font-size:15px;margin-bottom:16px">
-            Iniciar minicurso gratis →
-          </a>
-          <p style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;margin:0">
-            ¿Preguntas? Responde este email o escríbenos al WhatsApp.
-          </p>
-        </div>
-      </div>`,
-  },
-  b: {
-    subject: "Tu diagnóstico está reservado — aiLearning IyDE",
-    html: (nombre: string) => `
-      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;background:#05080e;color:#fff;border-radius:12px;overflow:hidden">
-        <div style="background:linear-gradient(135deg,#1a0d00,#3a1a00);padding:32px 32px 24px;text-align:center">
-          <div style="font-size:28px;font-weight:900;letter-spacing:-1px">ai<span style="color:#c05e1a">Learning</span> IyDE</div>
-        </div>
-        <div style="padding:32px">
-          <h1 style="font-size:22px;font-weight:800;margin:0 0 8px">¡Hola, ${nombre}! 👋</h1>
-          <p style="color:rgba(255,255,255,0.6);line-height:1.6;margin:0 0 24px">
-            Recibimos tu solicitud. En las próximas horas te contactamos para agendar tu diagnóstico gratuito de 15 minutos.
-          </p>
-          <a href="https://ailearning.mx/diagnostico"
-            style="display:block;text-align:center;background:#c05e1a;color:#fff;text-decoration:none;padding:14px 24px;border-radius:10px;font-weight:700;font-size:15px;margin-bottom:16px">
-            Agendar diagnóstico ahora →
-          </a>
-          <p style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center;margin:0">
-            También puedes escribirnos directamente por WhatsApp.
-          </p>
-        </div>
-      </div>`,
-  },
-};
 
 interface RegisterModalProps {
   open: boolean;
@@ -100,51 +50,28 @@ export function RegisterModal({ open, tipo, emailInicial, onClose, onSuccess }: 
     }
     setLoading(true); setError("");
     try {
-      // 1. Crear/actualizar contacto en Brevo
-      await fetch("https://api.brevo.com/v3/contacts", {
+      const res = await fetch("/api/leads", {
         method: "POST",
-        headers: {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "api-key": BREVO_KEY,
-        },
+        headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          email: form.email.trim().toLowerCase(),
-          updateEnabled: true,
-          listIds: [tipo === "f" ? 3 : 4],
-          attributes: {
-            FIRSTNAME: form.nombre.split(" ")[0],
-            LASTNAME:  form.nombre.split(" ").slice(1).join(" ") || "",
-            WHATSAPP:  form.whatsapp,
-            SMS:       form.whatsapp,
-            COUNTRY:   form.pais,
-            FUENTE:    form.fuente || "Hero ailearning.mx",
-            TIPO:      tipo === "f" ? "Formacion" : "Empresas",
-          },
+          source: "Hero ailearning.mx",
+          tipo,
+          nombre: form.nombre,
+          email: form.email,
+          whatsapp: form.whatsapp,
+          pais: form.pais,
+          fuente: form.fuente,
+          consent: true,
         }),
       });
-
-      // 2. Enviar email de bienvenida vía Brevo transaccional
-      const tpl = EMAIL_TEMPLATES[tipo];
-      await fetch("https://api.brevo.com/v3/smtp/email", {
-        method: "POST",
-        headers: {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "api-key": BREVO_KEY,
-        },
-        body: JSON.stringify({
-          sender:  { name: "Jeshua · aiLearning", email: "hola@ailearning.mx" },
-          to:      [{ email: form.email.trim().toLowerCase(), name: form.nombre }],
-          subject: tpl.subject,
-          htmlContent: tpl.html(form.nombre.split(" ")[0]),
-        }),
-      });
-
+      if (!res.ok) {
+        setError("No pudimos completar tu registro. Intenta de nuevo en un momento.");
+        return;
+      }
       setStep("success");
       setTimeout(() => { onSuccess(); }, 2200);
     } catch {
-      setError("Ocurrió un error. Intenta de nuevo.");
+      setError("Ocurrió un error de conexión. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -315,7 +242,7 @@ export function RegisterModal({ open, tipo, emailInicial, onClose, onSuccess }: 
 
                   <p className="text-[9px] text-center m-0" style={{ color:"rgba(255,255,255,0.2)" }}>
                     Sin spam. Tus datos están seguros.{" "}
-                    <a href="/aviso-de-privacidad" style={{ color:"rgba(255,255,255,0.35)" }}
+                    <a href="/privacidad" style={{ color:"rgba(255,255,255,0.35)" }}
                       className="underline underline-offset-2">Aviso de privacidad</a>.
                   </p>
                 </form>

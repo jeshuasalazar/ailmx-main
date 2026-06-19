@@ -83,7 +83,7 @@ const DATA = {
 export function Ladder() {
   const [tab, setTab]   = useState<LadderType>("f");
   const [step, setStep] = useState(0);
-  const { secs, mm, ss, urgent } = useCountdown(600);
+  const { mm, ss, urgent } = useCountdown(600);
   const data    = DATA[tab];
   const current = data[step];
   const hasDiscount = !!current.discount;

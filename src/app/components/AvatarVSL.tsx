@@ -11,78 +11,6 @@ const SUBTITLES = [
 ];
 
 
-/* ─── Contador de urgencia ──────────────────────────────── */
-function CTAUrgencia() {
-  const [secs, setSecs] = useState(600); // 10 minutos
-  const [claimed, setClaimed] = useState(false);
-
-  useEffect(() => {
-    const t = setInterval(() => setSecs(s => s > 0 ? s-1 : 0), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const mm = String(Math.floor(secs/60)).padStart(2,"0");
-  const ss = String(secs%60).padStart(2,"0");
-  const urgent = secs < 120; // últimos 2 min
-
-  return (
-    <div style={{ display:"flex", flexDirection:"column", gap:8,
-      padding:"12px 16px", borderTop:"1px solid rgba(255,255,255,0.06)" }}>
-
-      {/* Contador + regalo */}
-      <div style={{ borderRadius:10, padding:"8px 10px",
-        background: urgent ? "rgba(239,68,68,0.1)" : "rgba(43,127,224,0.08)",
-        border: `1px solid ${urgent ? "rgba(239,68,68,0.3)" : "rgba(43,127,224,0.2)"}` }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:4 }}>
-          <span style={{ fontSize:9, fontWeight:700, letterSpacing:"0.08em",
-            textTransform:"uppercase",
-            color: urgent ? "#f87171" : "rgba(43,127,224,0.8)" }}>
-            {urgent ? "⚡ ¡Últimos momentos!" : "🎁 Oferta por tiempo limitado"}
-          </span>
-          <span style={{ fontSize:16, fontWeight:800, fontVariantNumeric:"tabular-nums",
-            color: urgent ? "#f87171" : "#fff",
-            fontFamily:"monospace" }}>
-            {mm}:{ss}
-          </span>
-        </div>
-        <p style={{ fontSize:10, color:"rgba(255,255,255,0.45)", margin:0, lineHeight:1.4 }}>
-          Agenda ahora y recibe <strong style={{ color:"#fff" }}>gratis</strong> nuestra
-          {" "}<strong style={{ color: urgent ? "#f87171" : "#6ab0f5" }}>
-            Guía de Automatización con n8n
-          </strong>{" "}
-          (valor $497 MXN)
-        </p>
-      </div>
-
-      {/* CTA principal */}
-      <a href="/diagnostico"
-        onClick={() => setClaimed(true)}
-        style={{ display:"block", textAlign:"center", borderRadius:12,
-          padding:"12px 0", fontSize:13, fontWeight:700, color:"#fff",
-          textDecoration:"none",
-          background: urgent ? "linear-gradient(135deg,#ef4444,#dc2626)" : "#2B7FE0",
-          boxShadow: urgent
-            ? "0 0 18px rgba(239,68,68,0.5),0 4px 12px rgba(239,68,68,0.2)"
-            : "0 0 18px rgba(43,127,224,0.5),0 4px 12px rgba(43,127,224,0.2)" }}>
-        $0 · Agendar Protocolo (15 min) →
-      </a>
-
-      {/* Secundario */}
-      <a href="/cursos" style={{ display:"block", textAlign:"center",
-        borderRadius:12, padding:"9px 0", fontSize:12, fontWeight:500,
-        color:"rgba(255,255,255,0.4)", textDecoration:"none",
-        border:"1px solid rgba(255,255,255,0.08)" }}>
-        Ver Cursos de Formación
-      </a>
-
-      {/* Micro texto garantía */}
-      <p style={{ fontSize:9, textAlign:"center", color:"rgba(255,255,255,0.2)", margin:0 }}>
-        Sin tarjeta · Sin compromiso · Cancelable en cualquier momento
-      </p>
-    </div>
-  );
-}
-
 export function AvatarVSL() {
   const [open, setOpen]       = useState(false);
   const [muted, setMuted]     = useState(true);
@@ -107,10 +35,13 @@ export function AvatarVSL() {
     if (open) {
       v.currentTime = 0;
       v.muted = true;
+      // Reset de UI al abrir: sincroniza React con el elemento <video> (sistema externo)
+      /* eslint-disable react-hooks/set-state-in-effect */
       setMuted(true);
       setCT(0);
       setEnded(false);
       setShowCTA(false);
+      /* eslint-enable react-hooks/set-state-in-effect */
       v.play().catch(() => {});
     } else {
       v.pause();
