@@ -1,0 +1,2 @@
+import type { MetadataRoute } from "next";
+export default function sitemap(): MetadataRoute.Sitemap { const base = process.env.NEXT_PUBLIC_SITE_URL || "https://ailearning.mx"; return ["", "/academia", "/consultoria", "/contacto", "/legal/privacidad", "/legal/terminos", "/legal/cookies"].map((path) => ({ url: `${base}/es${path}`, lastModified: new Date("2026-06-19"), changeFrequency: path ? "monthly" : "weekly", priority: path ? 0.7 : 1 })); }

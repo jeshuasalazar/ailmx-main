@@ -1,40 +1,31 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-// Stack de sistema: cero descargas de fuentes en build/runtime (cierra B10).
-const fontVars = {
-  "--font-geist-sans":
-    'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  "--font-geist-mono":
-    'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
-} as React.CSSProperties;
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ailearning.mx";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://ailearning.mx"),
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "aiLearning — Formación y consultoría en IA aplicada",
+    default: "aiLearning — IA que se convierte en trabajo real",
     template: "%s · aiLearning",
   },
   description:
-    "Aprende a construir agentes de IA o implementa IA en tu empresa. Formación y consultoría en español, con resultados verificables.",
+    "Formación práctica y consultoría para convertir la inteligencia artificial en capacidades que tu equipo pueda usar.",
+  applicationName: "aiLearning",
   openGraph: {
-    title: "aiLearning — IA aplicada para profesionales y empresas",
-    description:
-      "Formación y consultoría en IA aplicada. Empieza gratis; sube de nivel solo si ves valor.",
+    title: "aiLearning — IA que se convierte en trabajo real",
+    description: "Formación práctica y consultoría en inteligencia artificial aplicada.",
     locale: "es_MX",
     type: "website",
+    siteName: "aiLearning",
   },
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className="h-full antialiased" style={fontVars}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="es">
+      <body>{children}</body>
     </html>
   );
 }

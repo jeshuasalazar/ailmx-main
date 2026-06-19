@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound() { return <main className="not-found"><div><p className="display">404</p><h1>Esta ruta no existe.</h1><p>Puede que el enlace haya cambiado o que el contenido ya no esté disponible.</p><Link className="button button-primary" href="/es">Volver al inicio</Link></div></main>; }

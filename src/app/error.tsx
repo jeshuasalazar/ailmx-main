@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) { return <div className="not-found" role="alert"><div><p className="eyebrow">Error recuperable</p><h1>No pudimos cargar esta página.</h1><p>Intenta de nuevo. Si el problema continúa, vuelve al inicio.</p><button className="button button-primary" type="button" onClick={() => reset()}>Intentar de nuevo</button></div></div>; }
