@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Brand } from "./brand";
 
 export function SiteFooter() {
@@ -12,15 +11,15 @@ export function SiteFooter() {
           </div>
           <nav className="footer-links" aria-label="Oferta">
             <strong>Explora</strong>
-            <Link href="/es/academia">Academia</Link>
-            <Link href="/es/consultoria">Consultoría</Link>
-            <Link href="/es/contacto">Contacto</Link>
+            <a href="/es/academia">Academia</a>
+            <a href="/es/consultoria">Consultoría</a>
+            <a href="/es/contacto">Contacto</a>
           </nav>
           <nav className="footer-links" aria-label="Información legal">
             <strong>Legal</strong>
-            <Link href="/es/legal/privacidad">Privacidad</Link>
-            <Link href="/es/legal/terminos">Términos</Link>
-            <Link href="/es/legal/cookies">Cookies</Link>
+            <a href="/es/legal/privacidad">Privacidad</a>
+            <a href="/es/legal/terminos">Términos</a>
+            <a href="/es/legal/cookies">Cookies</a>
           </nav>
         </div>
         <div className="footer-bottom">

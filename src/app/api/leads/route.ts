@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       to: [{ email: process.env.LEADS_NOTIFICATION_EMAIL || "hola@ailearning.mx", name: "aiLearning" }],
       replyTo: { email: lead.email, name: lead.nombre },
       subject: "Nueva solicitud de consultoría — aiLearning",
-      htmlContent: `<h1>Nueva solicitud de consultoría</h1><p><strong>Nombre:</strong> ${escapeHtml(lead.nombre)}</p><p><strong>Empresa:</strong> ${escapeHtml(lead.pais || "No indicada")}</p><p><strong>Mensaje:</strong></p><p>${escapeHtml(lead.mensaje).replace(/\n/g, "<br>")}</p>`,
+      htmlContent: `<h1>Nueva solicitud de consultoría</h1><p><strong>Nombre:</strong> ${escapeHtml(lead.nombre)}</p><p><strong>País:</strong> ${escapeHtml(lead.pais || "No indicado")}</p><p><strong>Mensaje:</strong></p><p>${escapeHtml(lead.mensaje).replace(/\n/g, "<br>")}</p>`,
     });
     if (!notificationOk) return json({ error: "upstream" }, 502);
   }

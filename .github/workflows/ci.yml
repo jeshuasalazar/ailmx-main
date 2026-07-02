@@ -34,8 +34,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e -- --project=chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:e2e -- --project=chromium --project=firefox --project=webkit --project=mobile
 
   container:
     runs-on: ubuntu-latest

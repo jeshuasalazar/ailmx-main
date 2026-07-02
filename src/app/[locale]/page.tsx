@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ArrowRight, ArrowUpRight, BookOpen, BriefcaseBusiness, Compass, FileText } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -21,9 +20,50 @@ const faqs = [
   ["¿Qué ocurre con mis datos al contactarlos?", "Usamos únicamente la información necesaria para responder tu solicitud. No enviamos datos personales en URLs ni los exponemos a servicios de terceros desde el navegador."],
 ] as const;
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ailearning.mx";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "aiLearning",
+      url: `${siteUrl}/es`,
+      logo: `${siteUrl}/icon.svg`,
+      description: "Formación práctica y consultoría para aplicar inteligencia artificial con método y criterio.",
+      address: { "@type": "PostalAddress", addressCountry: "MX" },
+      areaServed: "MX",
+      contactPoint: { "@type": "ContactPoint", url: `${siteUrl}/es/contacto`, contactType: "customer service", availableLanguage: "es" },
+      knowsAbout: ["Inteligencia artificial aplicada", "Formación en IA", "Consultoría en IA"],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      name: "aiLearning",
+      url: `${siteUrl}/es`,
+      inLanguage: "es-MX",
+      publisher: { "@id": `${siteUrl}/#organization` },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${siteUrl}/es#faq`,
+      mainEntity: faqs.map(([question, answer]) => ({
+        "@type": "Question",
+        name: question,
+        acceptedAnswer: { "@type": "Answer", text: answer },
+      })),
+    },
+  ],
+};
+
 export default function SpanishHome() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <section className="hero">
         <div className="hero-grid">
           <div className="hero-copy">
@@ -31,8 +71,8 @@ export default function SpanishHome() {
             <h1 className="display">Menos ruido.<br />Más <em>capacidad.</em></h1>
             <p className="subtitle">Aprende a construir con IA o convierte una oportunidad de tu empresa en un sistema que la gente pueda usar.</p>
             <div className="hero-actions">
-              <Link className="button button-primary" href="/es/academia">Explorar Academia <ArrowRight size={18} aria-hidden="true" /></Link>
-              <Link className="button button-outline" href="/es/consultoria">Ver Consultoría</Link>
+              <a className="button button-primary" href="/es/academia">Explorar Academia <ArrowRight size={18} aria-hidden="true" /></a>
+              <a className="button button-outline" href="/es/consultoria">Ver Consultoría</a>
             </div>
             <div className="hero-note">
               <span className="mono">01 / PRINCIPIO</span>
@@ -51,21 +91,21 @@ export default function SpanishHome() {
         <div className="container">
           <p className="eyebrow">Dos rutas, una misma exigencia</p>
           <h2 className="title" id="elige-ruta">¿Qué necesitas mover hoy?</h2>
-          <div className="choice-grid" style={{ marginTop: "2.5rem" }}>
-            <Link className="choice" href="/es/academia">
+          <div className="choice-grid choice-grid-spaced">
+            <a className="choice" href="/es/academia">
               <span className="choice-number mono">RUTA 01 · PROFESIONALES</span>
               <BookOpen size={34} strokeWidth={1.5} aria-hidden="true" />
               <h2>Quiero<br />aprender.</h2>
               <p>Rutas prácticas para entender, construir y trabajar con sistemas de IA con mayor autonomía.</p>
               <span className="choice-link">Conocer Academia <ArrowUpRight size={18} aria-hidden="true" /></span>
-            </Link>
-            <Link className="choice choice-consult" href="/es/consultoria">
+            </a>
+            <a className="choice choice-consult" href="/es/consultoria">
               <span className="choice-number mono">RUTA 02 · ORGANIZACIONES</span>
               <BriefcaseBusiness size={34} strokeWidth={1.5} aria-hidden="true" />
               <h2>Quiero<br />implementar.</h2>
               <p>Diagnóstico y acompañamiento para convertir una oportunidad en una solución útil y gobernable.</p>
               <span className="choice-link">Conocer Consultoría <ArrowUpRight size={18} aria-hidden="true" /></span>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -88,9 +128,9 @@ export default function SpanishHome() {
         <div className="container">
           <p className="eyebrow">Recursos vigentes</p><h2 className="title" id="recursos">Empieza por algo concreto.</h2>
           <div className="resource-grid">
-            <Link className="resource-card" href="/es/academia"><BookOpen aria-hidden="true" /><h3>Ruta Academia</h3><p>Comprende el enfoque y continúa el registro en la plataforma académica.</p></Link>
-            <Link className="resource-card" href="/es/consultoria"><Compass aria-hidden="true" /><h3>Diagnóstico de oportunidad</h3><p>Ordena un caso de uso antes de comprometer tecnología y presupuesto.</p></Link>
-            <Link className="resource-card" href="/jornadas2026"><FileText aria-hidden="true" /><h3>Guía Jornadas 2026</h3><p>Recurso descargable de la campaña para asistentes de AMCP.</p></Link>
+            <a className="resource-card" href="/es/academia"><BookOpen aria-hidden="true" /><h3>Ruta Academia</h3><p>Comprende el enfoque y continúa el registro en la plataforma académica.</p></a>
+            <a className="resource-card" href="/es/consultoria"><Compass aria-hidden="true" /><h3>Diagnóstico de oportunidad</h3><p>Ordena un caso de uso antes de comprometer tecnología y presupuesto.</p></a>
+            <a className="resource-card" href="/jornadas2026"><FileText aria-hidden="true" /><h3>Guía Jornadas 2026</h3><p>Recurso descargable de la campaña para asistentes de AMCP.</p></a>
           </div>
         </div>
       </section>
@@ -98,12 +138,12 @@ export default function SpanishHome() {
       <section className="section" aria-labelledby="preguntas">
         <div className="container content-grid">
           <div><p className="eyebrow">Preguntas frecuentes</p><h2 className="title" id="preguntas">Antes de empezar.</h2></div>
-          <div className="faq-list">{faqs.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div>
+          <div className="faq-list">{faqs.map(([question, answer]) => <details key={question} name="faq"><summary>{question}</summary><p>{answer}</p></details>)}</div>
         </div>
       </section>
 
       <section className="cta-band section-sm">
-        <div className="container cta-grid"><div><p className="eyebrow">Siguiente paso</p><h2 className="title">Elige una pregunta real. Empecemos ahí.</h2></div><Link className="button button-light" href="/es/contacto">Hablemos <ArrowRight size={18} aria-hidden="true" /></Link></div>
+        <div className="container cta-grid"><div><p className="eyebrow">Siguiente paso</p><h2 className="title">Elige una pregunta real. Empecemos ahí.</h2></div><a className="button button-light" href="/es/contacto">Hablemos <ArrowRight size={18} aria-hidden="true" /></a></div>
       </section>
     </>
   );

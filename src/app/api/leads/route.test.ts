@@ -10,7 +10,7 @@ function request(body: unknown, ip = crypto.randomUUID()) {
   });
 }
 
-const validLead = { source: "test", tipo: "b", nombre: "Ana García", email: "ana@example.com", mensaje: "Automatizar una tarea", consent: true };
+const validLead = { source: "test", tipo: "b", nombre: "Ana García", email: "ana@example.com", pais: "México", mensaje: "Automatizar una tarea", consent: true };
 
 describe("POST /api/leads", () => {
   beforeEach(() => { process.env.BREVO_API_KEY = "server-secret"; });
@@ -23,10 +23,14 @@ describe("POST /api/leads", () => {
   });
 
   it("acepta un lead cuando el proveedor responde 2xx", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 201 })));
+    const provider = vi.fn().mockResolvedValue(new Response(null, { status: 201 }));
+    vi.stubGlobal("fetch", provider);
     const response = await POST(request(validLead));
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ ok: true });
+    const contactBody = JSON.parse(provider.mock.calls[0][1]?.body as string);
+    expect(contactBody.attributes.COUNTRY).toBe("México");
+    expect(contactBody.attributes).not.toHaveProperty("COMPANY");
   });
 
   it("devuelve un error genérico cuando falla el proveedor", async () => {
@@ -34,6 +38,11 @@ describe("POST /api/leads", () => {
     const response = await POST(request({ ...validLead, email: "otra@example.com" }));
     expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({ error: "upstream" });
+  });
+
+  it("rechaza el contrato histórico que enviaba empresa como país", async () => {
+    const response = await POST(request({ ...validLead, pais: undefined, empresa: "Acme" }));
+    expect(response.status).toBe(400);
   });
 
   it("limita ráfagas por dirección", async () => {

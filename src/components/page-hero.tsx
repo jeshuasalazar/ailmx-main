@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 export function PageHero({
@@ -26,18 +25,18 @@ export function PageHero({
           <h1 className="title">{title}</h1>
           <p className="subtitle">{description}</p>
           {cta && (
-            <Link className="button button-primary" style={{ marginTop: "2rem" }} href={cta.href} target={cta.external ? "_blank" : undefined} rel={cta.external ? "noreferrer" : undefined}>
+            <a className="button button-primary page-hero-cta" href={cta.href} target={cta.external ? "_blank" : undefined} rel={cta.external ? "noreferrer" : undefined}>
               {cta.label}<ArrowUpRight size={18} aria-hidden="true" />
-            </Link>
+            </a>
           )}
         </div>
-        <aside className={`page-hero-aside ${tone}`}>
+        <div className={`page-hero-aside ${tone}`}>
           <p className="mono">EN ESTA RUTA</p>
           <h2>{asideTitle}</h2>
           <ul className="aside-list">
             {items.map((item) => <li key={item}>{item}</li>)}
           </ul>
-        </aside>
+        </div>
       </div>
     </section>
   );
